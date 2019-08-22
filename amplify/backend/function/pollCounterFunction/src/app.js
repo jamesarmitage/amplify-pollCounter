@@ -147,8 +147,8 @@ app.post(path, function(req, res) {
     req.body['userId'] = req.apiGateway.event.requestContext.identity.cognitoIdentityId || UNAUTH;
   }
 
-  const UpdateAttribute = req.query['vote'] === 'no' ? 'votesNo' : 'votesYes'
-  const VoteValue = req.query['vote'] === 'no' ? -1 : 1
+  const UpdateAttribute = req.query['vote'] === 'no' ? 'votesNo' : 'votesYes';
+  const VoteValue = req.query['vote'] === 'no' ? -1 : 1;
 
   let updateItemParams = {
     TableName: tableName,
@@ -170,7 +170,7 @@ app.post(path, function(req, res) {
     } else{
       res.json({success: 'post call succeed!', url: req.url, data: data})
     }
-  }
+  })
 
   let putItemParams = {
     TableName: tableNameTimestamped,
@@ -187,11 +187,9 @@ app.post(path, function(req, res) {
       res.statusCode = 500;
       res.json({error: err, url: req.url, body: req.body});
     } else{
-      res.json({success: 'insert call succeed!', url: req.url, data: data})
+      res.json({success: 'put call succeed!', url: req.url, data: data})
     }
-  }
-
-  )
+  })
 })
 
 app.listen(3000, function() {
