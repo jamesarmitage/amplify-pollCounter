@@ -19,6 +19,7 @@ AWS.config.update({ region: process.env.TABLE_REGION });
 const dynamodb = new AWS.DynamoDB.DocumentClient();
 
 let tableName = "pollCounterDDB";
+let tableNameTimestamped = "MantarayVotes";
 if(process.env.ENV && process.env.ENV !== "NONE") {
   tableName = tableName + '-' + process.env.ENV;
 }
@@ -147,6 +148,7 @@ app.post(path, function(req, res) {
   }
 
   const UpdateAttribute = req.query['vote'] === 'no' ? 'votesNo' : 'votesYes'
+  const VoteValue = req.query['vote'] === 'no' ? -1 : 1
 
   let updateItemParams = {
     TableName: tableName,
@@ -158,7 +160,7 @@ app.post(path, function(req, res) {
     ExpressionAttributeValues:{
         ":val": 1
     },
-    ReturnValues:"UPDATED_NEW"    
+    ReturnValues:"UPDATED_NEW"
   }
 
   dynamodb.update(updateItemParams, (err, data) => {
@@ -168,7 +170,28 @@ app.post(path, function(req, res) {
     } else{
       res.json({success: 'post call succeed!', url: req.url, data: data})
     }
-  })
+  }
+
+  let putItemParams = {
+    TableName: tableNameTimestamped,
+    Item: {
+      GameId: 'poll-001',
+      TimeStamp: 123,
+      Vote: VoteValue,
+      IP: '4.3.2.1'
+    }
+  }
+
+  dynamodb.put(putItemParams, (err, data) => {
+    if(err) {
+      res.statusCode = 500;
+      res.json({error: err, url: req.url, body: req.body});
+    } else{
+      res.json({success: 'insert call succeed!', url: req.url, data: data})
+    }
+  }
+
+  )
 })
 
 app.listen(3000, function() {
